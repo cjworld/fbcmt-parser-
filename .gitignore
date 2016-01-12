@@ -55,3 +55,10 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Virtual Environment
+myvenv/
+
+# Django
+fbcmtparsersite/db.sqlite3
+fbcmtparsersite/static
