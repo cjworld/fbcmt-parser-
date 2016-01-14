@@ -16,15 +16,18 @@ Including another URLconf
 """
 from django.conf.urls import patterns, include, url
 from django.conf.urls.static import static
-from django.contrib.auth import views
+from django.contrib.auth import views as auth_views
 import settings
 
 from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = [
+    url('', include('social.apps.django_app.urls', namespace='social')),
+    url(r'^logout/$', 'fbcmt.views.logout'),
+    
     url(r'^admin/', admin.site.urls),
-    url(r'^accounts/login/$', views.login),
-    url(r'^accounts/logout/$', views.logout, {'next_page': '/'}),
+    url(r'^accounts/login/$', auth_views.login),
+    url(r'^accounts/logout/$', auth_views.logout, {'next_page': '/'}),
     url(r'^parser/', include('fbcmt.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

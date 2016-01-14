@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'fbcmt',
     'rest_framework',
+    'social.apps.django_app.default',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -66,10 +67,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social.apps.django_app.context_processors.backends',
+                'social.apps.django_app.context_processors.login_redirect',
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'fbcmtparsersite.wsgi.application'
 
@@ -139,3 +143,18 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+AUTHENTICATION_BACKENDS = (
+    'social.backends.facebook.FacebookOAuth2',
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.twitter.TwitterOAuth',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/parser/'
+SOCIAL_AUTH_LOGIN_URL = '/login/'
+
+SOCIAL_AUTH_FACEBOOK_KEY = '198868903558179'
+SOCIAL_AUTH_FACEBOOK_SECRET = '79974c299c933d563ee78378977fbc8d'
+
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']

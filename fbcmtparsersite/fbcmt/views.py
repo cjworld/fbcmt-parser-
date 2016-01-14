@@ -3,6 +3,11 @@ from .models import User, Post, Photo
 from .permissions import PostAuthorCanEditPermission
 from rest_framework import generics, permissions
 
+from django.shortcuts import render_to_response, redirect, render
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.decorators import login_required
+
+
 
 class PostMixin(object):
     queryset = Post.objects.all()
@@ -27,6 +32,7 @@ class UserDetail(generics.RetrieveAPIView):
     model = User
     serializer_class = UserSerializer
     lookup_field = 'username'
+
 
 
 class PostList(PostMixin, generics.ListCreateAPIView):
@@ -76,3 +82,8 @@ class PostPhotoList(generics.ListAPIView):
     def get_queryset(self):
         queryset = Photo.objects.all()
         return queryset.filter(post__pk=self.kwargs.get('pk'))
+
+
+def logout(request):
+    auth_logout(request)
+    return redirect('/parser/')
