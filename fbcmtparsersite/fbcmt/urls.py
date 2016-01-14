@@ -1,15 +1,32 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
+from django.views.generic import TemplateView
 from . import views
 
+from .views import UserList, UserDetail
+from .views import PostList, PostDetail, UserPostList
+from .views import PhotoList, PhotoDetail, PostPhotoList
+
+user_urls = [
+    url(r'^(?P<username>[0-9a-zA-Z_-]+)/posts$', UserPostList.as_view(), name='userpost-list'),
+    url(r'^(?P<username>[0-9a-zA-Z_-]+)$', UserDetail.as_view(), name='user-detail'),
+    url(r'^$', UserList.as_view(), name='user-list')
+]
+
+post_urls = [
+    url(r'^(?P<pk>\d+)/photos$', PostPhotoList.as_view(), name='postphoto-list'),
+    url(r'^(?P<pk>\d+)$', PostDetail.as_view(), name='post-detail'),
+    url(r'^$', PostList.as_view(), name='post-list')
+]
+
+photo_urls = [
+    url(r'^(?P<pk>\d+)$', PhotoDetail.as_view(), name='photo-detail'),
+    url(r'^$', PhotoList.as_view(), name='photo-list')
+]
+
 urlpatterns = [
-    url(r'^$', views.post_list, name='post_list'),
-    url(r'^post/(?P<pk>[0-9]+)/$', views.post_detail, name='post_detail'),
-    url(r'^post/new/$', views.post_new, name='post_new'),
-    url(r'^post/(?P<pk>[0-9]+)/edit/$', views.post_edit, name='post_edit'),
-    url(r'^post/(?P<pk>[0-9]+)/remove/$', views.post_remove, name='post_remove'),
-    url(r'^drafts/$', views.post_draft_list, name='post_draft_list'),
-    url(r'^post/(?P<pk>[0-9]+)/publish/$', views.post_publish, name='post_publish'),
-    url(r'^post/(?P<pk>[0-9]+)/comment/$', views.add_comment_to_post, name='add_comment_to_post'),
-    url(r'^comment/(?P<pk>[0-9]+)/approve/$', views.comment_approve, name='comment_approve'),
-    url(r'^comment/(?P<pk>[0-9]+)/remove/$', views.comment_remove, name='comment_remove'),
+    url(r'^$', TemplateView.as_view(template_name='manage.html')),
+    url(r'^users/', include(user_urls)),
+    url(r'^posts/', include(post_urls)),
+    url(r'^photos/', include(photo_urls)),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

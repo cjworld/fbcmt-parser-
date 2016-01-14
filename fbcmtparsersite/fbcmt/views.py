@@ -1,86 +1,78 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from .models import Post, Comment
-from .forms import PostForm, CommentForm
+from .serializers import UserSerializer, PostSerializer, PhotoSerializer
+from .models import User, Post, Photo
+from .permissions import PostAuthorCanEditPermission
+from rest_framework import generics, permissions
 
-# Create your views here.
-def post_list(request):
-    posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('published_date')
-    return render(request, 'fbcmt/post_list.html', {'posts': posts})
-    
-def post_detail(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    return render(request, 'fbcmt/post_detail.html', {'post': post})
-    
-@login_required
-def post_new(request):
-    if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.published_date = timezone.now()
-            post.save()
-            return redirect('post_detail', pk=post.pk)
-    else:
-        form = PostForm()
-    return render(request, 'fbcmt/post_edit.html', {'form': form})
-    
-@login_required
-def post_edit(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.published_date = timezone.now()
-            post.save()
-            return redirect('post_detail', pk=post.pk)
-    else:
-        form = PostForm(instance=post)
-    return render(request, 'fbcmt/post_edit.html', {'form': form})
 
-@login_required
-def post_draft_list(request):
-    posts = Post.objects.filter(published_date__isnull=True).order_by('created_date')
-    return render(request, 'fbcmt/post_draft_list.html', {'posts': posts})
-    
-@login_required
-def post_publish(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    post.publish()
-    return redirect('fbcmt.views.post_detail', pk=pk)
-    
-@login_required
-def post_remove(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    post.delete()
-    return redirect('fbcmt.views.post_list')
+class PostMixin(object):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [
+        PostAuthorCanEditPermission
+    ]
 
-def add_comment_to_post(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == "POST":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.save()
-            return redirect('fbcmt.views.post_detail', pk=post.pk)
-    else:
-        form = CommentForm()
-    return render(request, 'fbcmt/add_comment_to_post.html', {'form': form})
+    def perform_create(self, obj):
+        obj.save(author = self.request.user)
 
-@login_required
-def comment_approve(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-    comment.approve()
-    return redirect('fbcmt.views.post_detail', pk=comment.post.pk)
 
-@login_required
-def comment_remove(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-    post_pk = comment.post.pk
-    comment.delete()
-    return redirect('fbcmt.views.post_detail', pk=post_pk)
+class UserList(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (
+        permissions.AllowAny,
+    )
+
+
+class UserDetail(generics.RetrieveAPIView):
+    model = User
+    serializer_class = UserSerializer
+    lookup_field = 'username'
+
+
+class PostList(PostMixin, generics.ListCreateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = (
+        permissions.AllowAny,
+    )
+
+
+class PostDetail(PostMixin, generics.RetrieveUpdateDestroyAPIView):
+    model = Post
+    serializer_class = PostSerializer
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+
+class UserPostList(generics.ListAPIView):
+    model = Post
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        queryset = super(UserPostList, self).get_queryset()
+        return queryset.filter(author__username=self.kwargs.get('username'))
+
+
+class PhotoList(generics.ListCreateAPIView):
+    model = Photo
+    serializer_class = PhotoSerializer
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+
+class PhotoDetail(generics.RetrieveUpdateDestroyAPIView):
+    model = Photo
+    serializer_class = PhotoSerializer
+    permission_classes = [
+        permissions.AllowAny
+    ]
+
+
+class PostPhotoList(generics.ListAPIView):
+    serializer_class = PhotoSerializer
+
+    def get_queryset(self):
+        queryset = Photo.objects.all()
+        return queryset.filter(post__pk=self.kwargs.get('pk'))
