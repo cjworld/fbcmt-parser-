@@ -2,6 +2,44 @@
 
 var fbcmtControllers = angular.module('fbcmtControllers', []);
 
+
+fbcmtControllers.controller('FbPostCtlr', ['$scope', '$http', function ($scope, $http) {
+    $scope.loader = {
+      loading: false,
+    };
+    $scope.google_mail = null;
+    $scope.reply_on_post = false;
+    $scope.facebook_url = null;
+    $scope.author_posts = [];
+    $scope.convert = function(){
+      $scope.author_posts = [];
+      $scope.loader.loading=true;
+      $http({
+        method: 'GET',
+        url: 'fbghapi',
+        params: {
+            facebook_url: $scope.facebook_url,
+            google_mail: $scope.google_mail,
+            reply_on_post: $scope.reply_on_post
+        }
+      }).then(function(result) {
+        $scope.loader.loading=false;
+        console.log(result.data.posts);
+        angular.forEach(result.data.posts, function(value, key) {
+            //console.log(value);
+            if (value.comment_level == 1) {
+                value['comments'] = [value['comments']];
+            }
+            $scope.author_posts.push(value);
+        });
+      }, function(errorMsg) {
+        $scope.loader.loading=false;
+        //console.log(errorMsg);
+      });
+    };
+}]);
+
+
 fbcmtControllers.controller('PostController', ['$scope', '$q', 'Post', 'PostPhoto', function ($scope, $q, Post, PostPhoto) {
     $scope.photos = {}
     $scope.posts = Post.query();

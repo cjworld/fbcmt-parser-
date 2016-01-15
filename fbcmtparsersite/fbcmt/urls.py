@@ -24,9 +24,10 @@ photo_urls = [
 ]
 
 urlpatterns = [
-    url(r'^$', TemplateView.as_view(template_name='manage.html')),
-    url(r'^users/', include(user_urls)),
-    url(r'^posts/', include(post_urls)),
-    url(r'^photos/', include(photo_urls)),
+    url(r'^$', TemplateView.as_view(template_name='base.html')),
+    url(r'^fbghapi$', views.FacebookGraphAPI),
+    #url(r'^users/', include(user_urls)),
+    #url(r'^posts/', include(post_urls)),
+    #url(r'^photos/', include(photo_urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
