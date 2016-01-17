@@ -1,0 +1,130 @@
+{% load staticfiles %}
+
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="{% static "bootstrap/dist/css/bootstrap.css" %}">
+</head>
+<body ng-app="fbcmtApp">
+<div class="container">
+{% if user and not user.is_anonymous %}
+Hello, <b>{{ user.get_full_name }}!</b>, <a href="/logout/">Logout</a>
+{% else %}
+  <a href="{% url 'social:begin' 'facebook' %}?next={{ request.path }}">Login with Facebook</a>
+{% endif %}
+<div class="content col-md-12" ng-controller="FbPostCtlr">
+{% block content %}
+    <div>
+		<div class="page-header">
+			<h1>
+				FB開團小幫手 <small>請輸入你開團的表單，讓我們幫你計算總量</small>
+			</h1>
+		</div>
+        <form role="form" class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-sm-2">Link:</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" ng-model="facebook_url" placeholder="請輸入你的Facebook連結">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <div class="checkbox">
+                        <label><input type="checkbox" ng-model="reply_on_post"> Reply on post.</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button ng-hide="loader.loading" class="btn btn-default btn-default btn-lg " ng-click="get_messages()">計算</button>
+                    <button ng-show="loader.loading" ng-disabled="loader.loading" class="btn btn-default btn-success btn-lg ">處理中...
+                        <i class="fa fa-spinner fa-spin"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+        <div class="panel panel-default">
+    		<div class="panel-heading">
+    			所有的訊息 <small>請幫忙轉換成要下單的數量</small>
+    		</div>
+            <table class="table">
+                <teable>
+                    <thead>
+                        <tr>
+                            <th>
+                                訊息
+                            </th>
+                            <th>
+                                數量
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="message in message_array">
+                            <td>
+                                {% verbatim %}
+                                {{ message.text }}
+                                {% endverbatim %}
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <!-- Buttons -->
+                                        <button class="btn btn-default" type="button" ng-click="minus(message)">
+                                            －
+                                        </button>
+                                    </div>
+                                    <input type="text" class="form-control" aria-label="..." ng-model="message.value">
+                                    <div class="input-group-btn">
+                                        <!-- Buttons -->
+                                        <button class="btn btn-default" type="button" ng-click="plus(message)">
+                                            ＋
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </teable>
+            </table>
+            <div class="panel-footer">
+                {% verbatim %}
+                總共: {{ total_value }}
+                {% endverbatim %}
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div>
+    	<h1>
+			Google Spreadsheet產生器 <small>請輸入你Google的帳號，讓我們幫你轉成表單</small>
+		</h1>
+        <form role="form" class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-sm-2">Gmail:</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" ng-model="google_mail" placeholder="請輸入你Google硬碟用的email">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button ng-hide="loader.loading" ng-disabled="loader.loading" class="btn btn-default btn-default btn-lg " ng-click="convert()">轉換</button>
+                    <button ng-show="loader.loading" ng-disabled="loader.loading" class="btn btn-default btn-success btn-lg ">處理中...
+                        <i class="fa fa-spinner fa-spin"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+</div>
+</div>
+{% block js %}
+<script src="{% static "underscore/underscore.js" %}"></script>
+<script src="{% static "angular/angular.js" %}"></script>
+<script src="{% static "angular/angular-resource.js" %}"></script>
+<script src="{% static "js/app.js" %}"></script>
+<script src="{% static "js/controllers.js" %}"></script>
+<script src="{% static "js/services.js" %}"></script>
+{% endblock %}
+</body>
+</html>

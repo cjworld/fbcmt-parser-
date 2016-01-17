@@ -214,3 +214,32 @@ def update_google_spreadsheet(sh, users_dict, post_list):
         
     if len(ttl_cells) > 0:
         ws.update_cells(ttl_cells)
+
+
+def update_google_spreadsheet_simple(sh, users_dict):
+    
+    USER_COUNT = len(users_dict)
+    USER_COL = 1
+    USER_ROW_OFFSET = 1
+    
+    VALUE_COL = 2
+    VALUE_ROW_OFFSET = 1
+
+    title_worksheet = "summary"
+    ws = sh.add_worksheet(title=title_worksheet, rows=USER_COUNT + USER_ROW_OFFSET + 1, cols=VALUE_COL)
+    value_end_pos = pair2index(USER_COUNT + USER_ROW_OFFSET, VALUE_COL)
+    end_pos = pair2index(USER_COUNT + USER_ROW_OFFSET + 1, VALUE_COL)
+    ttl_cells = ws.range("A1:%s" % end_pos)
+    
+    if len(ttl_cells) > 0:
+        ttl_cells[0].value = "User"
+        ttl_cells[1].value = "Amount"
+        total_value = 0
+        for user_idx, user_info in enumerate(users_dict.values()):
+            ttl_cells[(VALUE_ROW_OFFSET+user_idx)*2].value = user_info.get('name')
+            ttl_cells[(VALUE_ROW_OFFSET+user_idx)*2 + 1].value = user_info.get('value')
+            total_value += user_info.get('value')
+        ttl_cells[(VALUE_ROW_OFFSET+USER_COUNT)*2].value = "Total"
+        ttl_cells[(VALUE_ROW_OFFSET+USER_COUNT)*2 + 1].value = "=SUM(B2:%s)" % value_end_pos
+        ws.update_cells(ttl_cells)
+

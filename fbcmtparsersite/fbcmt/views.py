@@ -11,6 +11,7 @@ from django.http import JsonResponse
 import facebook
 import google
 import datetime
+import json
 
 
 class PostMixin(object):
@@ -126,3 +127,45 @@ def FacebookGraphAPI(request):
     print ">> Total time consumed:", ending_time-starting_time
     
     return JsonResponse(ret_json)
+    
+def FacebookGraphAPI_get_comments(request):
+    
+    print ">> New incoming request:", request.GET
+    reply_on_post = True if request.GET.get('reply_on_post') == u'true' else False
+    
+    starting_time = datetime.datetime.now()
+    social_user = request.user.social_auth.filter(
+        provider='facebook',
+    ).first()
+    access_token = social_user.extra_data.get('access_token')
+    facebook_url = request.GET.get('facebook_url').strip()
+    
+    object_id = facebook.get_object_id(facebook_url)
+    print '>> object_id:', object_id
+    ret_json = facebook.get_comments(object_id, access_token)
+    
+    return JsonResponse(ret_json)
+    
+def GoogleDriveAPI_new_spreadsheet(request):
+    
+    print ">> New incoming request:", request.GET
+    google_mail = request.GET.get('google_mail')
+    spreadsheet_data = request.GET.get('spreadsheet_data')
+    spreadsheet_data = json.loads(spreadsheet_data)
+    
+    starting_time = datetime.datetime.now()
+    print ">> Start processing: ", starting_time
+    
+    spreadsheet_name = "AutoGenRobot" + starting_time.strftime("%Y%m%d%H%M%S")
+    g_ss_svc = google.GoogleSpreadSheetService()
+    if google_mail is not None and len(google_mail.strip()) > 0:
+        sh = g_ss_svc.create_a_spreadsheet(spreadsheet_name, email_list=[google_mail])
+    else:
+        sh = g_ss_svc.create_a_spreadsheet(spreadsheet_name)
+    google.update_google_spreadsheet_simple(sh, spreadsheet_data)
+    
+    ending_time = datetime.datetime.now()
+    
+    print ">> Total time consumed:", ending_time-starting_time
+    
+    return JsonResponse({'status':200})
