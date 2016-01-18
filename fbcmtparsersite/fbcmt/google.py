@@ -20,9 +20,12 @@ DEBUG = False
 class GoogleSpreadSheetService(object):
         
     def __init__(self):
-        print os.getcwd()
+        if DEBUG:
+            print os.getcwd()
         dir_path = os.path.dirname(__file__)
         key_file = os.path.join(dir_path, 'API Project-22c8534a71fd.json')
+        if DEBUG:
+            print 'key_file:', key_file
         self.api_data = json.load(open(key_file))
         scope = ['https://spreadsheets.google.com/feeds']
         credentials = oauth2client.client.SignedJwtAssertionCredentials(self.api_data['client_email'], self.api_data['private_key'], scope)
@@ -48,6 +51,10 @@ class GoogleSpreadSheetService(object):
         credential_path = os.path.join(credential_dir, 'drive-python-quickstart.json')
         if DEBUG:
             print 'credential_path:', credential_path
+        dir_path = os.path.dirname(__file__)
+        client_secret_file = os.path.join(dir_path, client_secret_file)
+        if DEBUG:
+            print 'client_secret_file:', client_secret_file
     
         store = oauth2client.file.Storage(credential_path)
         credentials = store.get()
