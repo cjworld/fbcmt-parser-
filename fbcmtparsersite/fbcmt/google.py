@@ -21,7 +21,9 @@ class GoogleSpreadSheetService(object):
         
     def __init__(self):
         print os.getcwd()
-        self.api_data = json.load(open('API Project-22c8534a71fd.json'))
+        dir_path = os.path.dirname(__file__)
+        key_file = os.path.join(dir_path, 'API Project-22c8534a71fd.json')
+        self.api_data = json.load(open(key_file))
         scope = ['https://spreadsheets.google.com/feeds']
         credentials = oauth2client.client.SignedJwtAssertionCredentials(self.api_data['client_email'], self.api_data['private_key'], scope)
         self.gc = gspread.authorize(credentials)
