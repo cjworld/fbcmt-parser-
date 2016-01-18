@@ -220,7 +220,12 @@ def update_google_spreadsheet(sh, users_dict, post_list):
 
 def update_google_spreadsheet_simple(sh, users_dict):
     
-    USER_COUNT = len(users_dict)
+    available_users_dict = {}
+    for user_id, user_info in users_dict.iteritems():
+        if user_info.get('value') > 0:
+            available_users_dict[user_id] = user_info
+    
+    USER_COUNT = len(available_users_dict)
     USER_COL = 1
     USER_ROW_OFFSET = 1
     
@@ -237,7 +242,7 @@ def update_google_spreadsheet_simple(sh, users_dict):
         ttl_cells[0].value = "User"
         ttl_cells[1].value = "Amount"
         total_value = 0
-        for user_idx, user_info in enumerate(users_dict.values()):
+        for user_idx, user_info in enumerate(available_users_dict.values()):
             ttl_cells[(VALUE_ROW_OFFSET+user_idx)*2].value = user_info.get('name')
             ttl_cells[(VALUE_ROW_OFFSET+user_idx)*2 + 1].value = user_info.get('value')
             total_value += user_info.get('value')
