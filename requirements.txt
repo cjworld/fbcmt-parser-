@@ -1,6 +1,6 @@
 apiclient==1.0.2
 cffi==1.4.2
-cryptography==1.2.1
+cryptography==3.2
 dj-database-url==0.3.0
 dj-static==0.0.6
 Django==1.9
