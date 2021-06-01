@@ -37,4 +37,4 @@ simplejson==3.8.1
 six==1.10.0
 static3==0.6.1
 uritemplate==0.6
-urllib3==1.14
+urllib3==1.26.5
