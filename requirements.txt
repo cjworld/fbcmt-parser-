@@ -21,7 +21,7 @@ Markdown==2.6.5
 ndg-httpsclient==0.4.0
 oauth2client==1.5.2
 oauthlib==1.0.3
-Pillow==3.1.0
+Pillow==9.3.0
 pyasn1==0.1.9
 pyasn1-modules==0.0.8
 pycparser==2.14
